@@ -1,8 +1,33 @@
 services:
   url-shortener:
+    depends_on:
+      - mongo
     build:
       context: .
+    container_name: url-shortener
+    networks:
+      - appnet
     ports:
       - 8080:8080
     volumes:
       - ./:/app
+
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    networks:
+      - appnet
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    volumes:
+      - mongo-data:/data/db
+    ports:
+      - 27017:27017
+
+volumes:
+  mongo-data:
+
+networks:
+  appnet:
