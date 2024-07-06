@@ -7,6 +7,9 @@ services:
     container_name: url-shortener
     networks:
       - appnet
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
     ports:
       - 8080:8080
     volumes:
