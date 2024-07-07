@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/amaterasutears/url-shortener/internal/entity"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -19,7 +18,7 @@ func New(client *redis.Client) *Repository {
 }
 
 func (r *Repository) Put(code, original string) error {
-	err := r.client.Set(context.TODO(), code, original, time.Hour).Err()
+	err := r.client.Set(context.Background(), code, original, time.Hour).Err()
 	if err != nil {
 		return err
 	}
@@ -27,13 +26,11 @@ func (r *Repository) Put(code, original string) error {
 	return nil
 }
 
-func (r *Repository) FindOne(code string) (*entity.Link, error) {
-	var link entity.Link
-
-	err := r.client.Get(context.TODO(), code).Scan(&link)
+func (r *Repository) FindOne(code string) (string, error) {
+	original, err := r.client.Get(context.Background(), code).Result()
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return &link, nil
+	return original, nil
 }

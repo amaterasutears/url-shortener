@@ -1,4 +1,4 @@
-package link
+package links
 
 import (
 	"context"
@@ -19,7 +19,10 @@ func New(collection *mongo.Collection) *Repository {
 }
 
 func (r *Repository) Put(code, original string) error {
-	_, err := r.collection.InsertOne(context.TODO(), bson.M{"code": code, "original": original})
+	_, err := r.collection.InsertOne(
+		context.Background(),
+		bson.M{"code": code, "original": original},
+	)
 	if err != nil {
 		return err
 	}
@@ -27,18 +30,18 @@ func (r *Repository) Put(code, original string) error {
 	return nil
 }
 
-func (r *Repository) FindOne(code string) (*entity.Link, error) {
+func (r *Repository) FindOne(code string) (string, error) {
 	filter := bson.M{"code": code}
 
 	var link entity.Link
 
-	err := r.collection.FindOne(context.TODO(), filter).Decode(&link)
+	err := r.collection.FindOne(context.Background(), filter).Decode(&link)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return nil, err
+			return "", err
 		}
-		return nil, err
+		return "", err
 	}
 
-	return &link, nil
+	return link.Original, nil
 }

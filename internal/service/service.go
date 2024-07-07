@@ -1,27 +1,27 @@
 package service
 
 import (
+	"log"
 	"net/url"
 	"strings"
 
-	"github.com/amaterasutears/url-shortener/internal/entity"
 	"github.com/amaterasutears/url-shortener/internal/shortener"
 )
 
-type LinkRepository interface {
+type LinksRepository interface {
 	Put(code, original string) error
-	FindOne(code string) (*entity.Link, error)
+	FindOne(code string) (string, error)
 }
 
 type Service struct {
-	linkRepository  LinkRepository
-	cacheRepository LinkRepository
+	linksRepository      LinksRepository
+	cacheLinksRepository LinksRepository
 }
 
-func New(linkRepository LinkRepository, cacheRepository LinkRepository) *Service {
+func New(linkRepository LinksRepository, cacheLinksRepository LinksRepository) *Service {
 	return &Service{
-		linkRepository:  linkRepository,
-		cacheRepository: cacheRepository,
+		linksRepository:      linkRepository,
+		cacheLinksRepository: cacheLinksRepository,
 	}
 }
 
@@ -33,10 +33,10 @@ func (s *Service) Shorten(original string) (string, error) {
 
 	code := shortener.Code(original)
 
-	_, err = s.linkRepository.FindOne(code)
+	_, err = s.linksRepository.FindOne(code)
 	if err != nil {
-		s.linkRepository.Put(code, original)
-		s.cacheRepository.Put(code, original)
+		s.linksRepository.Put(code, original)
+		s.cacheLinksRepository.Put(code, original)
 		return code, nil
 	}
 
@@ -44,15 +44,16 @@ func (s *Service) Shorten(original string) (string, error) {
 }
 
 func (s *Service) Redirect(code string) (string, error) {
-	link, err := s.cacheRepository.FindOne(code)
+	original, err := s.cacheLinksRepository.FindOne(code)
+	log.Println(original)
 	if err != nil {
-		link, err = s.linkRepository.FindOne(code)
+		original, err = s.linksRepository.FindOne(code)
 		if err != nil {
 			return "", err
 		}
 	}
 
-	return link.Original, nil
+	return original, nil
 }
 
 func (s *Service) normalizeURL(original string) (string, error) {
