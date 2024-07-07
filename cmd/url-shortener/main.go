@@ -7,7 +7,13 @@ import (
 	"os"
 	"time"
 
+	"github.com/amaterasutears/url-shortener/internal/handler"
+	"github.com/amaterasutears/url-shortener/internal/repository/cache"
+	"github.com/amaterasutears/url-shortener/internal/repository/link"
+	"github.com/amaterasutears/url-shortener/internal/service"
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"github.com/redis/go-redis/v9"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -21,21 +27,41 @@ func main() {
 	mongoPassword := os.Getenv("MONGO_INITDB_ROOT_PASSWORD")
 	mongoURI := fmt.Sprintf("mongodb://%s:%s@mongo:27017", mongoUsername, mongoPassword)
 
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(mongoURI))
+	mongoClient, err := mongo.Connect(ctx, options.Client().ApplyURI(mongoURI))
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer func() {
-		err := client.Disconnect(ctx)
+		err := mongoClient.Disconnect(ctx)
 		if err != nil {
 			log.Fatal(err)
 		}
 	}()
 
-	err = client.Ping(ctx, readpref.Primary())
+	err = mongoClient.Ping(ctx, readpref.Primary())
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	collection := mongoClient.Database("url-shortener").Collection("links")
+
+	redisClient := redis.NewClient(&redis.Options{
+		Addr:     "redis:6379",
+		Password: "",
+		DB:       0,
+	})
+	defer func() {
+		err := redisClient.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	linkRepo := link.New(collection)
+	cacheRepo := cache.New(redisClient)
+	svc := service.New(linkRepo, cacheRepo)
+
+	v := validator.New(validator.WithRequiredStructEnabled())
 
 	app := fiber.New()
 
@@ -44,6 +70,9 @@ func main() {
 			"status": "ok",
 		})
 	})
+
+	app.Get("/a", handler.Shorten(svc, v))
+	app.Get("/s/:code", handler.Redirect(svc, v))
 
 	err = app.Listen(":8080")
 	if err != nil {
