@@ -1,8 +1,6 @@
 package service
 
 import (
-	"log"
-
 	"github.com/amaterasutears/url-shortener/internal/shortener"
 )
 
@@ -38,7 +36,6 @@ func (s *Service) Shorten(original string) (string, error) {
 
 func (s *Service) Redirect(code string) (string, error) {
 	original, err := s.cacheLinksRepository.FindOne(code)
-	log.Println(original)
 	if err != nil {
 		original, err = s.linksRepository.FindOne(code)
 		if err != nil {

@@ -6,8 +6,8 @@ import (
 	"os"
 
 	"github.com/amaterasutears/url-shortener/internal/handler"
-	"github.com/amaterasutears/url-shortener/internal/repository/cache"
-	"github.com/amaterasutears/url-shortener/internal/repository/links"
+	links "github.com/amaterasutears/url-shortener/internal/repository/mongo"
+	cache "github.com/amaterasutears/url-shortener/internal/repository/redis"
 	"github.com/amaterasutears/url-shortener/internal/service"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"

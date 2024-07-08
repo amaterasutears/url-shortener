@@ -1,4 +1,4 @@
-package links
+package mongo
 
 import (
 	"context"
@@ -8,17 +8,17 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type Repository struct {
+type MongoRepository struct {
 	collection *mongo.Collection
 }
 
-func New(collection *mongo.Collection) *Repository {
-	return &Repository{
+func New(collection *mongo.Collection) *MongoRepository {
+	return &MongoRepository{
 		collection: collection,
 	}
 }
 
-func (r *Repository) Put(code, original string) error {
+func (r *MongoRepository) Put(code, original string) error {
 	_, err := r.collection.InsertOne(
 		context.Background(),
 		bson.M{"code": code, "original": original},
@@ -30,7 +30,7 @@ func (r *Repository) Put(code, original string) error {
 	return nil
 }
 
-func (r *Repository) FindOne(code string) (string, error) {
+func (r *MongoRepository) FindOne(code string) (string, error) {
 	filter := bson.M{"code": code}
 
 	var link entity.Link

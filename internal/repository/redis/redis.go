@@ -7,17 +7,17 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-type Repository struct {
+type RedisRepository struct {
 	client *redis.Client
 }
 
-func New(client *redis.Client) *Repository {
-	return &Repository{
+func New(client *redis.Client) *RedisRepository {
+	return &RedisRepository{
 		client: client,
 	}
 }
 
-func (r *Repository) Put(code, original string) error {
+func (r *RedisRepository) Put(code, original string) error {
 	err := r.client.Set(context.Background(), code, original, time.Hour).Err()
 	if err != nil {
 		return err
@@ -26,7 +26,7 @@ func (r *Repository) Put(code, original string) error {
 	return nil
 }
 
-func (r *Repository) FindOne(code string) (string, error) {
+func (r *RedisRepository) FindOne(code string) (string, error) {
 	original, err := r.client.Get(context.Background(), code).Result()
 	if err != nil {
 		return "", err
