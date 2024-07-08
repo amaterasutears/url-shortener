@@ -2,8 +2,6 @@ package service
 
 import (
 	"log"
-	"net/url"
-	"strings"
 
 	"github.com/amaterasutears/url-shortener/internal/shortener"
 )
@@ -26,14 +24,9 @@ func New(linkRepository LinksRepository, cacheLinksRepository LinksRepository) *
 }
 
 func (s *Service) Shorten(original string) (string, error) {
-	original, err := s.normalizeURL(original)
-	if err != nil {
-		return "", err
-	}
-
 	code := shortener.Code(original)
 
-	_, err = s.linksRepository.FindOne(code)
+	_, err := s.linksRepository.FindOne(code)
 	if err != nil {
 		s.linksRepository.Put(code, original)
 		s.cacheLinksRepository.Put(code, original)
@@ -54,23 +47,4 @@ func (s *Service) Redirect(code string) (string, error) {
 	}
 
 	return original, nil
-}
-
-func (s *Service) normalizeURL(original string) (string, error) {
-	parsedURL, err := url.Parse(original)
-	if err != nil {
-		return "", err
-	}
-
-	ok := strings.HasPrefix(parsedURL.Host, "www.")
-	if ok {
-		parsedURL.Host = strings.TrimPrefix(parsedURL.Host, "www.")
-	}
-
-	ok = strings.HasSuffix(parsedURL.Path, "/")
-	if ok {
-		parsedURL.Path = strings.TrimSuffix(parsedURL.Path, "/")
-	}
-
-	return parsedURL.String(), nil
 }
