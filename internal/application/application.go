@@ -26,7 +26,7 @@ func Run() error {
 		return err
 	}
 	defer func() error {
-		err := mongoClient.Disconnect(context.Background())
+		err = mongoClient.Disconnect(context.Background())
 		if err != nil {
 			return err
 		}
