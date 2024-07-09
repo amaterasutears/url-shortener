@@ -6,12 +6,12 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-type LinkService interface {
+type ShortenerService interface {
 	Shorten(original string) (string, error)
 	Redirect(code string) (string, error)
 }
 
-func Shorten(linkService LinkService, validate *validator.Validate) fiber.Handler {
+func Shorten(shortenerService ShortenerService, validate *validator.Validate) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		var p dto.ShortenQueryParam
 
@@ -25,7 +25,7 @@ func Shorten(linkService LinkService, validate *validator.Validate) fiber.Handle
 			return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 		}
 
-		code, err := linkService.Shorten(p.Original)
+		code, err := shortenerService.Shorten(p.Original)
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
 		}
@@ -34,7 +34,7 @@ func Shorten(linkService LinkService, validate *validator.Validate) fiber.Handle
 	}
 }
 
-func Redirect(linkService LinkService, validate *validator.Validate) fiber.Handler {
+func Redirect(shortenerService ShortenerService, validate *validator.Validate) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		var p dto.RedirectParam
 
@@ -48,7 +48,7 @@ func Redirect(linkService LinkService, validate *validator.Validate) fiber.Handl
 			return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 		}
 
-		original, err := linkService.Redirect(p.Code)
+		original, err := shortenerService.Redirect(p.Code)
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
 		}

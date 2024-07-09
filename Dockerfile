@@ -2,7 +2,7 @@ FROM golang:1.22.4-alpine
 
 WORKDIR /app
 
-RUN apk update
+RUN apk update && apk add make
 
 RUN go install github.com/air-verse/air@latest
 

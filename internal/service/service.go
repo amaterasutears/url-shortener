@@ -10,24 +10,24 @@ type LinksRepository interface {
 }
 
 type Service struct {
-	linksRepository      LinksRepository
-	cacheLinksRepository LinksRepository
+	mongoRepository LinksRepository
+	redisRepository LinksRepository
 }
 
-func New(linkRepository LinksRepository, cacheLinksRepository LinksRepository) *Service {
+func New(mongoRepository LinksRepository, redisRepository LinksRepository) *Service {
 	return &Service{
-		linksRepository:      linkRepository,
-		cacheLinksRepository: cacheLinksRepository,
+		mongoRepository: mongoRepository,
+		redisRepository: redisRepository,
 	}
 }
 
 func (s *Service) Shorten(original string) (string, error) {
 	code := shortener.Code(original)
 
-	_, err := s.linksRepository.FindOne(code)
+	_, err := s.mongoRepository.FindOne(code)
 	if err != nil {
-		s.linksRepository.Put(code, original)
-		s.cacheLinksRepository.Put(code, original)
+		s.mongoRepository.Put(code, original)
+		s.redisRepository.Put(code, original)
 		return code, nil
 	}
 
@@ -35,9 +35,9 @@ func (s *Service) Shorten(original string) (string, error) {
 }
 
 func (s *Service) Redirect(code string) (string, error) {
-	original, err := s.cacheLinksRepository.FindOne(code)
+	original, err := s.redisRepository.FindOne(code)
 	if err != nil {
-		original, err = s.linksRepository.FindOne(code)
+		original, err = s.mongoRepository.FindOne(code)
 		if err != nil {
 			return "", err
 		}

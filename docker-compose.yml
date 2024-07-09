@@ -11,13 +11,15 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_DB: ${MONGO_DB}
+      MONGO_COLLECTION: ${MONGO_COLLECTION}
     ports:
       - 8080:8080
     volumes:
       - ./:/app
 
   mongo:
-    image: mongo:latest
+    image: mongo:7.0.12-jammy
     container_name: mongo
     networks:
       - appnet
