@@ -8,53 +8,54 @@ import (
 )
 
 func TestCode(t *testing.T) {
-	t.Run("returns code", func(t *testing.T) {
+	t.Run("returns the code", func(t *testing.T) {
 		type testCase struct {
-			src      string
+			original string
 			expected string
 		}
 
 		testCases := []testCase{
 			{
-				src:      "https://google.com",
+				original: "https://google.com",
 				expected: "05046f26",
 			},
 			{
-				src:      "https://google.com/somesymbols",
-				expected: "dd4a7086",
+				original: "https://vk.com/profile/135134",
+				expected: "48039f47",
 			},
 			{
-				src:      "https://google.com/somesymbols?someparam=somesymbols",
-				expected: "174fa2bb",
+				original: "https://github.com/altkraft/for-applicants/blob/master/backend/shortener/task.md",
+				expected: "5a63e03d",
 			},
 		}
-		t.Run("alpha, numeric or alphanumeric", func(t *testing.T) {
+
+		t.Run("consistings of alpha/numeric/alphanumeric symbols", func(t *testing.T) {
 			for _, tc := range testCases {
-				actual := shortener.Code(tc.src)
-				assert.Equal(t, tc.expected, actual)
+				code := shortener.Code(tc.original)
+				assert.Equal(t, tc.expected, code)
 			}
 		})
 
-		t.Run("length is 8", func(t *testing.T) {
+		t.Run("len(code) = 8", func(t *testing.T) {
 			for _, tc := range testCases {
-				actual := shortener.Code(tc.src)
-				assert.Equal(t, 8, len(actual))
+				code := shortener.Code(tc.original)
+				assert.Equal(t, 8, len(code))
 			}
 		})
 	})
 
 	t.Run("idempotent", func(t *testing.T) {
 		testCase := struct {
-			src      string
+			original string
 			expected string
 		}{
-			src:      "https://google.com",
+			original: "https://google.com",
 			expected: "05046f26",
 		}
 
 		for i := 0; i < 100; i++ {
-			actual := shortener.Code(testCase.src)
-			assert.Equal(t, testCase.expected, actual)
+			code := shortener.Code(testCase.original)
+			assert.Equal(t, testCase.expected, code)
 		}
 	})
 }
