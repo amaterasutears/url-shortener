@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/amaterasutears/url-shortener/internal/entity"
+	"github.com/amaterasutears/url-shortener/internal/service"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -11,6 +12,8 @@ import (
 type MongoRepository struct {
 	collection *mongo.Collection
 }
+
+var _ service.LinksRepository = (*MongoRepository)(nil)
 
 func New(collection *mongo.Collection) *MongoRepository {
 	return &MongoRepository{

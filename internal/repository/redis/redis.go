@@ -4,12 +4,15 @@ import (
 	"context"
 	"time"
 
+	"github.com/amaterasutears/url-shortener/internal/service"
 	"github.com/redis/go-redis/v9"
 )
 
 type RedisRepository struct {
 	client *redis.Client
 }
+
+var _ service.LinksRepository = (*RedisRepository)(nil)
 
 func New(client *redis.Client) *RedisRepository {
 	return &RedisRepository{

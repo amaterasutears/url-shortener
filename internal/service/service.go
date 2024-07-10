@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/amaterasutears/url-shortener/internal/handler"
 	"github.com/amaterasutears/url-shortener/internal/shortener"
 )
 
@@ -13,6 +14,8 @@ type Service struct {
 	mongoRepository LinksRepository
 	redisRepository LinksRepository
 }
+
+var _ handler.ShortenerService = (*Service)(nil)
 
 func New(mongoRepository LinksRepository, redisRepository LinksRepository) *Service {
 	return &Service{
