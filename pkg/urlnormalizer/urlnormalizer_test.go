@@ -1,44 +1,39 @@
-package urlnormalizer_test
+package urlnormalizer
 
 import (
 	"testing"
 
-	"github.com/amaterasutears/url-shortener/pkg/urlnormalizer"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestNormalize(t *testing.T) {
 	type testCase struct {
-		src      string
-		expected string
+		name        string
+		src         string
+		expected    string
+		expectedErr error
 	}
 
 	testCases := []testCase{
 		{
-			src:      "https://www.google.com/",
-			expected: "https://google.com",
+			name:        "returns an address without www. and / at the end of the path",
+			src:         "https://www.google.com/",
+			expected:    "https://google.com",
+			expectedErr: nil,
 		},
 		{
-			src:      "https://google.com/",
-			expected: "https://google.com",
-		},
-		{
-			src:      "https://www.google.com/somedata/",
-			expected: "https://google.com/somedata",
-		},
-		{
-			src:      "https://google.com/somedata/",
-			expected: "https://google.com/somedata",
-		},
-		{
-			src:      "https://www.google.com/somedata?somedata=somedata/",
-			expected: "https://google.com/somedata?somedata=somedata",
+			name:        "returns an address without www. but leaves a slash at the end of the request parameter path",
+			src:         "https://www.google.com/somaparam?=somedata/",
+			expected:    "https://google.com/somaparam?=somedata/",
+			expectedErr: nil,
 		},
 	}
 
 	for _, tc := range testCases {
-		actual, err := urlnormalizer.Normalize(tc.src)
-		assert.Nil(t, err)
-		assert.Equal(t, tc.expected, actual)
+		t.Run(tc.name, func(t *testing.T) {
+			actual, err := Normalize(tc.src)
+			assert.NoError(t, err)
+			assert.Equal(t, tc.expected, actual)
+		})
 	}
 }

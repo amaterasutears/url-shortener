@@ -1,4 +1,4 @@
-.PHONY: dcu dcd tidy
+.PHONY: dcu dcd tidy test
 
 dcu:
 	docker-compose up -d
@@ -8,3 +8,6 @@ dcd:
 
 tidy:
 	go mod tidy
+
+test:
+	go test ./...
